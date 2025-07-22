@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import LoginButton from './LoginButton';
+import LogoutButton from './LogoutButton';
+import Profile from './Profile';
 
-function App() {
+function WhackAMoleGame() {
   const [score, setScore] = useState(0);
   const [moles, setMoles] = useState(Array(9).fill(false));
   const [gameActive, setGameActive] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(15);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [highScore, setHighScore] = useState(0);
 
-  const toggleGame = () => {
-    if (!gameActive && timeLeft === 0) {
-      setTimeLeft(15);
-    }
-    setGameActive(!gameActive);
-    if (!gameActive) {
-      setScore(0);
-    }
+  const restartGame = () => {
+    setScore(0);
+    setTimeLeft(30);
+    setGameActive(true);
   };
 
   const whackMole = (index) => {
@@ -53,7 +53,7 @@ function App() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameActive, timeLeft]);
+  }, [gameActive, timeLeft, score, highScore]);
 
   return (
     <div style={{
@@ -114,11 +114,11 @@ function App() {
       </div>
 
       <button
-        onClick={toggleGame}
+        onClick={restartGame}
         style={{
           padding: '12px 30px',
           fontSize: '1.1rem',
-          background: gameActive ? '#e74c3c' : '#2ecc71',
+          background: '#3498db',
           color: 'white',
           border: 'none',
           borderRadius: '50px',
@@ -129,7 +129,7 @@ function App() {
           transition: 'all 0.3s'
         }}
       >
-        {gameActive ? "STOP" : "START GAME"}
+        Restart Game
       </button>
 
       <div style={{
@@ -198,6 +198,36 @@ function App() {
             }}>New High Score! 🎉</p>
           )}
         </div>
+      )}
+    </div>
+  );
+}
+
+function App() {
+  const { isAuthenticated, isLoading } = useAuth0();
+
+  if (isLoading) return <div>Loading authentication...</div>;
+
+  return (
+    <div style={{
+      textAlign: 'center',
+      fontFamily: "'Poppins', sans-serif",
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+    }}>
+      <h1>Welcome to My Auth0 React App</h1>
+      {!isAuthenticated ? (
+        <LoginButton />
+      ) : (
+        <>
+          <LogoutButton />
+          <Profile />
+          <WhackAMoleGame />
+        </>
       )}
     </div>
   );
